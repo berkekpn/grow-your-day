@@ -42,8 +42,7 @@ Görevleri tamamladıkça seçtiğin ağaç büyür, sarmaşıklar uzar ve sayfa
 
 ## 🚀 Live Demo
 
-> (Buraya GitHub Pages linkini ekle)  
-> Örn: `https://berkekpn.github.io/grow-your-day/`
+> https://berkekpn.github.io/grow-your-day/
 
 ---
 
