@@ -530,10 +530,10 @@ function updateClock() {
 
 /* HAVA DURUMU – OpenWeatherMap */
 
-const OPENWEATHER_API_KEY = "YOUR_API_KEY_HERE"; // buraya kendi key'ini yapıştır
+const OPENWEATHER_API_KEY = "d14d75a92a5223b18073e895d70574bc"; // buraya kendi key'ini yapıştır
 
 function fetchWeatherByCoords(lat, lon) {
-  if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === "YOUR_API_KEY_HERE") {
+  if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === "d14d75a92a5223b18073e895d70574bc") {
     weatherLocEl.textContent = "API anahtarını ekle";
     weatherDescEl.textContent = "OpenWeatherMap key eklenmeli.";
     weatherIconEl.style.display = "none";
