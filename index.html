@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grow Your Day | Berke</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-sakura">
+  <!-- Sarmaşıklar -->
+  <div class="vine vine-left"></div>
+  <div class="vine vine-right"></div>
+
+  <!-- Uçan yaprak katmanı -->
+  <div class="leaf-layer" id="leaf-layer"></div>
+
+  <div class="wrapper">
+    <header class="top-bar">
+      <div class="top-left">
+        <h1>Grow Your Day 🌱</h1>
+        <p>Günlük görevlerini tamamla, seçtiğin ağaç seninle birlikte büyüsün.</p>
+      </div>
+      <div class="top-right">
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- TODO PANEL -->
+      <section class="card todo-card">
+        <h2>Günlük Görevler</h2>
+
+        <form id="todo-form">
+          <div class="form-row">
+            <div class="field">
+              <label for="todo-time">Saat</label>
+              <input
+                type="time"
+                id="todo-time"
+                class="input-time"
+              />
+            </div>
+            <div class="field field-grow">
+              <label for="todo-input">Görev</label>
+              <input
+                type="text"
+                id="todo-input"
+                class="input-text"
+                placeholder="Örn: 09:00 Kahvaltı, 13:00 Ödev"
+                autocomplete="off"
+              />
+            </div>
+            <div class="field">
+              <label for="todo-category">Kategori</label>
+              <select id="todo-category" class="input-select">
+                <option value="general">Genel</option>
+                <option value="study">Ders</option>
+                <option value="work">İş</option>
+                <option value="health">Sağlık</option>
+                <option value="personal">Kişisel</option>
+              </select>
+            </div>
+            <div class="field field-button">
+              <label>&nbsp;</label>
+              <button type="submit" class="btn-primary">Ekle</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="filter-row">
+          <label for="category-filter">Filtre:</label>
+          <select id="category-filter" class="input-select">
+            <option value="all">Tüm görevler</option>
+            <option value="general">Genel</option>
+            <option value="study">Ders</option>
+            <option value="work">İş</option>
+            <option value="health">Sağlık</option>
+            <option value="personal">Kişisel</option>
+          </select>
+        </div>
+
+        <ul id="todo-list" class="todo-list"></ul>
+
+        <p class="hint">
+          Göreve tıklarsan <strong>tamamlandı</strong> sayılır. “Sil” ile kaldırırsın.
+          Her ağaç için görev listeleri ve ilerleme <strong>ayrı ayrı</strong> tutulur.
+        </p>
+
+        <div class="summary-card">
+          <div class="summary-row">
+            <span>Bugünkü görevler</span>
+            <span id="summary-total">0</span>
+          </div>
+          <div class="summary-row">
+            <span>Tamamlanan</span>
+            <span id="summary-completed">0</span>
+          </div>
+          <div class="summary-row">
+            <span>Genel tamamlama</span>
+            <span id="summary-rate">0%</span>
+          </div>
+          <div class="summary-row">
+            <span>Seri (streak)</span>
+            <span id="summary-streak">0 gün</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TREE + WEATHER PANEL -->
+      <section class="card tree-card">
+        <h2>Bugünün Ağacı 🌳</h2>
+
+        <div class="tree-selector">
+          <label for="tree-type">Ağaç türü:</label>
+          <select id="tree-type">
+            <option value="sakura">Sakura Ağacı</option>
+            <option value="oak">Meşe Ağacı</option>
+            <option value="plane">Çınar Ağacı</option>
+            <option value="pine">Çam Ağacı</option>
+            <option value="olive">Zeytin Ağacı</option>
+            <option value="maple">Akçaağaç</option>
+          </select>
+        </div>
+
+        <div class="tree-visual">
+          <div id="tree-circle" class="tree-circle stage-0">
+            <div id="tree-icon" class="tree-icon"></div>
+          </div>
+          <p id="tree-label" class="tree-label">Toprağa sakura tohumu ektin.</p>
+        </div>
+
+        <div class="progress">
+          <div class="progress-header">
+            <span>Günlük İlerleme</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+          <p id="progress-text" class="progress-text">
+            Başlamak için en az bir görev ekle.
+          </p>
+        </div>
+
+        <div class="weather-card">
+          <div class="weather-header">
+            <span>Bugünkü Hava</span>
+            <span id="weather-location">Konum alınıyor...</span>
+          </div>
+          <div class="weather-body">
+            <div class="weather-temp-block">
+              <div class="weather-temp" id="weather-temp">--°C</div>
+              <div class="weather-desc" id="weather-desc">—</div>
+            </div>
+            <div class="weather-icon-wrap">
+              <img id="weather-icon" alt="" />
+            </div>
+          </div>
+          <p class="weather-hint">
+            Konum izni vermezsen İstanbul için örnek hava gösterilir.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ORMAN ALANI -->
+    <div class="forest" id="forest"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
