@@ -533,7 +533,7 @@ function updateClock() {
 const OPENWEATHER_API_KEY = "d14d75a92a5223b18073e895d70574bc"; // buraya kendi key'ini yapıştır
 
 function fetchWeatherByCoords(lat, lon) {
-  if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === "d14d75a92a5223b18073e895d70574bc") {
+  if (!OPENWEATHER_API_KEY) {
     weatherLocEl.textContent = "API anahtarını ekle";
     weatherDescEl.textContent = "OpenWeatherMap key eklenmeli.";
     weatherIconEl.style.display = "none";
