@@ -32,6 +32,11 @@ const summaryCompletedEl = document.getElementById("summary-completed");
 const summaryRateEl = document.getElementById("summary-rate");
 const summaryStreakEl = document.getElementById("summary-streak");
 
+// İLERİDE HTML'E EKLEYECEĞİZ (yoksa null olur, sorun değil)
+const summaryLevelEl = document.getElementById("summary-level");
+const summaryXpEl = document.getElementById("summary-xp");
+const summaryBadgesEl = document.getElementById("summary-badges");
+
 /* SVG ikonlar – her ağaç tipi için */
 const TREE_SVGS = {
   sakura: `
@@ -79,7 +84,6 @@ const TREE_SVGS = {
 };
 
 /* Ağaç türleri – tema + büyüme yazıları */
-
 const TREE_TYPES = {
   sakura: {
     themeClass: "theme-sakura",
@@ -171,28 +175,30 @@ let currentCategoryFilter = "all";
 let streak = 0;
 let lastFullCompletionDate = null;
 
+/* ==== GAMIFICATION + STATE ==== */
+
 const STORAGE_KEY = "gyd_state_v1";
 
-/* LOCAL STORAGE */
+let stats = {
+  totalCompleted: 0,
+  dailyCounts: {}, // { "2025-12-12": 3, ... }
+  level: 1,
+  xp: 0,
+  nextLevelXp: 20,
+  badges: []
+};
 
-function saveState() {
-  const payload = {
-    currentTree,
-    boards,
-    streak,
-    lastFullCompletionDate
-  };
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  } catch (e) {
-    // sessizce geç
-  }
+function getTodayKey() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
+// localStorage'dan oku
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
+
     const data = JSON.parse(raw);
 
     if (data.currentTree && TREE_TYPES[data.currentTree]) {
@@ -210,12 +216,79 @@ function loadState() {
     if (typeof data.streak === "number") {
       streak = data.streak;
     }
+
     if (data.lastFullCompletionDate) {
       lastFullCompletionDate = data.lastFullCompletionDate;
     }
+
+    if (data.stats) {
+      stats = { ...stats, ...data.stats };
+    }
   } catch (e) {
-    // bozuksa boşver
+    console.error("loadState error", e);
   }
+}
+
+function saveState() {
+  try {
+    const data = {
+      currentTree,
+      boards,
+      streak,
+      lastFullCompletionDate,
+      stats
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error("saveState error", e);
+  }
+}
+
+/* XP / LEVEL / BADGE */
+
+function addXp(amount) {
+  stats.xp += amount;
+  let leveledUp = false;
+
+  while (stats.xp >= stats.nextLevelXp) {
+    stats.xp -= stats.nextLevelXp;
+    stats.level++;
+    stats.nextLevelXp = Math.round(stats.nextLevelXp * 1.4);
+    leveledUp = true;
+  }
+
+  if (leveledUp) {
+    showLevelUpToast();
+  }
+
+  updateBadges();
+}
+
+function showLevelUpToast() {
+  const el = document.getElementById("level-toast");
+  if (!el) return;
+  el.textContent = `Level ${stats.level}! Ormanını büyütmeye devam et 🌳`;
+  el.classList.add("visible");
+  setTimeout(() => el.classList.remove("visible"), 3000);
+}
+
+function updateBadges() {
+  const set = new Set(stats.badges);
+
+  if (stats.totalCompleted >= 10) set.add("Beginner Planter");
+  if (stats.totalCompleted >= 50) set.add("Forest Keeper");
+  if (stats.totalCompleted >= 100) set.add("Guardian of the Woods");
+  if (streak >= 7) set.add("One Week Streak");
+  if (streak >= 30) set.add("Unstoppable");
+
+  stats.badges = Array.from(set);
+}
+
+function onTaskCompleted() {
+  const today = getTodayKey();
+  stats.totalCompleted++;
+  stats.dailyCounts[today] = (stats.dailyCounts[today] || 0) + 1;
+  addXp(5); // her görev 5 XP
 }
 
 /* KATEGORİ LABEL */
@@ -302,7 +375,14 @@ function renderTasks() {
     if (task.completed) span.classList.add("completed");
 
     span.addEventListener("click", () => {
+      const wasCompleted = task.completed;
       task.completed = !task.completed;
+
+      // Sadece tamamlanmamıştan tamamlanmışa geçerken XP vs ver
+      if (!wasCompleted && task.completed) {
+        onTaskCompleted();
+      }
+
       renderTasks();
       updateTree();
     });
@@ -340,10 +420,6 @@ function getStageIndex(ratio) {
 }
 
 /* STREAK HESABI */
-
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function checkAndUpdateStreak(total, completed) {
   if (total === 0 || completed !== total) {
@@ -386,13 +462,30 @@ function updateSummary() {
 
   const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
 
+  // Önce streak'i güncelle
+  checkAndUpdateStreak(total, completed);
+
   summaryTotalEl.textContent = total;
   summaryCompletedEl.textContent = completed;
   summaryRateEl.textContent = `${rate}%`;
   summaryStreakEl.textContent = `${streak} gün`;
 
-  checkAndUpdateStreak(total, completed);
-  summaryStreakEl.textContent = `${streak} gün`;
+  // stats içine yaz
+  stats.streakCurrent = streak;
+  if (!stats.streakBest || streak > stats.streakBest) {
+    stats.streakBest = streak;
+  }
+
+  if (summaryLevelEl) {
+    summaryLevelEl.textContent = stats.level;
+  }
+  if (summaryXpEl) {
+    summaryXpEl.textContent = `${stats.xp}/${stats.nextLevelXp}`;
+  }
+  if (summaryBadgesEl) {
+    summaryBadgesEl.textContent =
+      stats.badges && stats.badges.length ? stats.badges.join(", ") : "–";
+  }
 
   saveState();
 }
@@ -533,7 +626,10 @@ function updateClock() {
 const OPENWEATHER_API_KEY = "d14d75a92a5223b18073e895d70574bc"; // buraya kendi key'ini yapıştır
 
 function fetchWeatherByCoords(lat, lon) {
-  if (!OPENWEATHER_API_KEY) {
+  if (
+    !OPENWEATHER_API_KEY ||
+    OPENWEATHER_API_KEY === "d14d75a92a5223b18073e895d70574bc"
+  ) {
     weatherLocEl.textContent = "API anahtarını ekle";
     weatherDescEl.textContent = "OpenWeatherMap key eklenmeli.";
     weatherIconEl.style.display = "none";
@@ -559,7 +655,8 @@ function fetchWeatherByCoords(lat, lon) {
       const iconCode = data.weather[0].icon;
 
       weatherTempEl.textContent = `${temp}°C`;
-      weatherDescEl.textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
+      weatherDescEl.textContent =
+        desc.charAt(0).toUpperCase() + desc.slice(1);
       weatherLocEl.textContent = city;
 
       weatherIconEl.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
